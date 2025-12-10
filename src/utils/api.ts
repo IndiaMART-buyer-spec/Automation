@@ -51,12 +51,12 @@ export async function generateStage1WithGemini(
 
     const content = data.candidates[0].content.parts[0].text;
 
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error("Invalid JSON in Gemini response");
+    const jsonStr = extractJSON(content);
+    if (!jsonStr) {
+      throw new Error("No valid JSON found in Gemini response");
     }
 
-    return JSON.parse(jsonMatch[0]);
+    return JSON.parse(jsonStr);
   } catch (error) {
     if (error instanceof Error) {
       throw error;
@@ -116,18 +116,75 @@ export async function extractISQWithGemini(
 
     const content = data.candidates[0].content.parts[0].text;
 
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error("Invalid JSON in Gemini response");
+    const jsonStr = extractJSON(content);
+    if (!jsonStr) {
+      throw new Error("No valid JSON found in Gemini response");
     }
 
-    return JSON.parse(jsonMatch[0]);
+    return JSON.parse(jsonStr);
   } catch (error) {
     if (error instanceof Error) {
       throw error;
     }
     throw new Error(`Unexpected error: ${String(error)}`);
   }
+}
+
+function extractJSON(text: string): string | null {
+  const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (jsonMatch) {
+    try {
+      JSON.parse(jsonMatch[1]);
+      return jsonMatch[1];
+    } catch {
+      // Continue to next extraction method
+    }
+  }
+
+  let braceCount = 0;
+  let inString = false;
+  let escapeNext = false;
+  let startIdx = -1;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+
+    if (escapeNext) {
+      escapeNext = false;
+      continue;
+    }
+
+    if (char === '\\' && inString) {
+      escapeNext = true;
+      continue;
+    }
+
+    if (char === '"' && !escapeNext) {
+      inString = !inString;
+      continue;
+    }
+
+    if (!inString) {
+      if (char === '{') {
+        if (braceCount === 0) startIdx = i;
+        braceCount++;
+      } else if (char === '}') {
+        braceCount--;
+        if (braceCount === 0 && startIdx !== -1) {
+          const jsonStr = text.substring(startIdx, i + 1);
+          try {
+            JSON.parse(jsonStr);
+            return jsonStr;
+          } catch {
+            // Continue searching
+          }
+          startIdx = -1;
+        }
+      }
+    }
+  }
+
+  return null;
 }
 
 async function fetchURL(url: string): Promise<string> {
