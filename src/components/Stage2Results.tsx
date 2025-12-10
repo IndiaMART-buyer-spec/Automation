@@ -1,0 +1,113 @@
+import React from "react";
+import { Download } from "lucide-react";
+import type { ISQ } from "../types";
+
+interface Stage2ResultsProps {
+  isqs: {
+    config: ISQ;
+    keys: ISQ[];
+    buyers: ISQ[];
+  };
+  onDownloadExcel: () => void;
+  onComparison: () => void;
+  loading?: boolean;
+}
+
+export default function Stage2Results({
+  isqs,
+  onDownloadExcel,
+  onComparison,
+  loading = false,
+}: Stage2ResultsProps) {
+  return (
+    <div className="w-full max-w-6xl mx-auto p-6">
+      <div className="bg-white rounded-lg shadow-lg p-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Stage 2: ISQ Extraction Complete</h1>
+        <p className="text-gray-600 mb-8">Review the extracted ISQs and download the Excel file</p>
+
+        {/* Config ISQ */}
+        <div className="mb-8">
+          <div className="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg">
+            <h2 className="text-2xl font-bold text-red-900 mb-4">Config ISQ</h2>
+            <div className="mb-4">
+              <p className="font-semibold text-lg text-gray-900">{isqs.config.name}</p>
+              <p className="text-sm text-gray-600 mt-1">Influences pricing and primary product variation</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {isqs.config.options.map((option, idx) => (
+                <span key={idx} className="bg-red-200 text-red-800 px-4 py-2 rounded-full font-medium">
+                  {option}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Key ISQs */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Key ISQs (3)</h2>
+          <div className="grid gap-4">
+            {isqs.keys.map((isq, idx) => (
+              <div key={idx} className="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg">
+                <p className="font-semibold text-lg text-gray-900 mb-3">
+                  {idx + 1}. {isq.name}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {isq.options.map((option, oIdx) => (
+                    <span key={oIdx} className="bg-blue-200 text-blue-800 px-3 py-1 rounded-full text-sm">
+                      {option}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Buyer ISQs */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Buyer ISQs (2)</h2>
+          <div className="grid gap-4">
+            {isqs.buyers.map((isq, idx) => (
+              <div key={idx} className="bg-green-50 border-l-4 border-green-500 p-6 rounded-lg">
+                <p className="font-semibold text-lg text-gray-900 mb-3">
+                  {idx + 1}. {isq.name}
+                  {isq.name === isqs.config.name && (
+                    <span className="ml-2 text-xs bg-green-200 text-green-800 px-2 py-1 rounded">
+                      Also Config ISQ
+                    </span>
+                  )}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {isq.options.map((option, oIdx) => (
+                    <span key={oIdx} className="bg-green-200 text-green-800 px-3 py-1 rounded-full text-sm">
+                      {option}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex gap-4 mt-8 pt-8 border-t border-gray-200">
+          <button
+            onClick={onDownloadExcel}
+            disabled={loading}
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg hover:from-green-700 hover:to-green-800 disabled:opacity-50 transition"
+          >
+            <Download size={20} />
+            Download Excel Report
+          </button>
+          <button
+            onClick={onComparison}
+            disabled={loading}
+            className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-purple-800 disabled:opacity-50 transition"
+          >
+            Compare Two Gemini Runs
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
