@@ -25,7 +25,7 @@ function App() {
     try {
       const result = await generateStage1WithGemini(data);
       setStage1Data(result);
-      setStage(stage1Data ? "stage1" : "stage0");
+      setStage("stage1");
     } catch (err) {
       setError(`Error: ${err instanceof Error ? err.message : "Unknown error"}`);
       console.error(err);
