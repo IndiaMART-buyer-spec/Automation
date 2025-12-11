@@ -33,7 +33,7 @@ try {
 } catch (e1) {
   // 4. try JSON5 as fallback (forgiving parser)
   try {
-    const JSON5 = require("json5");
+    import JSON5 from "json5";
     return JSON5.parse(possibleJson);
   } catch (e2) {
     throw new Error("Failed to repair JSON: " + e2.message);
