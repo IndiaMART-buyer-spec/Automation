@@ -6,23 +6,40 @@ function extractJSONFromGemini(response: any) {
     throw new Error("No candidates found in Gemini response");
   }
 
-  const content = response.candidates[0].content;
-  if (!content) throw new Error("No content in Gemini response");
+ // --- REPLACE OLD LOGIC WITH THIS ---
+const raw = response;
 
-  let raw = "";
+// 1. find the first and last curly bracket
+const start = raw.indexOf("{");
+const end = raw.lastIndexOf("}");
 
-  const parts = content.parts || content || [];
+if (start === -1 || end === -1 || end <= start) {
+  throw new Error("No JSON-like structure detected");
+}
 
-  for (const part of parts) {
-    if (typeof part.text === "string") {
-      raw += part.text + "\n";
-    }
+let possibleJson = raw.slice(start, end + 1);
 
-    // If Gemini returns a direct json object
-    if (part.json) {
-      return part.json;
-    }
+// 2. strip common Gemini noise
+possibleJson = possibleJson
+  .replace(/```json/gi, "")
+  .replace(/```/g, "")
+  .replace(/^\s*Here is.*?{/i, "{")
+  .replace(/^\s*JSON output.*?{/i, "{")
+  .replace(/\n/g, " ");
+
+// 3. try normal JSON.parse
+try {
+  return JSON.parse(possibleJson);
+} catch (e1) {
+  // 4. try JSON5 as fallback (forgiving parser)
+  try {
+    const JSON5 = require("json5");
+    return JSON5.parse(possibleJson);
+  } catch (e2) {
+    throw new Error("Failed to repair JSON: " + e2.message);
   }
+}
+
 
   // Fallback: extract JSON from text response
   const match = raw.match(/\{[\s\S]*\}/);
@@ -448,8 +465,7 @@ RESPOND WITH PURE JSON ONLY - Nothing else. No markdown, no explanation, just ra
   "config": {"name": "...", "options": [...]},
   "keys": [{"name": "...", "options": [...]}, ...],
   "buyers": [{"name": "...", "options": [...]}, ...]
-}`;
-}
+}`
 
 export async function generateExcel(
   stage1: Stage1Output,
