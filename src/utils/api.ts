@@ -1,17 +1,18 @@
 import type { InputData, Stage1Output, ISQ, ExcelData } from "../types";
 import JSON5 from "json5";
 
+
 // ---------------- GEMINI JSON EXTRACTOR (NEW) -----------------
-f// ---------------- GEMINI JSON EXTRACTOR (FIXED & CLEAN) -----------------
+
 function extractJSONFromGemini(response: any) {
   if (!response?.candidates?.length) {
     throw new Error("No candidates found in Gemini response");
   }
 
-  // Gemini sometimes returns objects → convert safely to string
+  // Convert response safely to string (Gemini sometimes sends objects)
   const raw = typeof response === "string" ? response : JSON.stringify(response);
 
-  // find first and last curly bracket
+  // Find first and last curly bracket
   const start = raw.indexOf("{");
   const end = raw.lastIndexOf("}");
 
@@ -19,10 +20,10 @@ function extractJSONFromGemini(response: any) {
     throw new Error("No JSON-like structure detected");
   }
 
-  // extract possible JSON segment
+  // Extract possible JSON part
   let possibleJson = raw.slice(start, end + 1);
 
-  // clean Gemini formatting noise
+  // Remove Gemini formatting noise
   possibleJson = possibleJson
     .replace(/```json/gi, "")
     .replace(/```/g, "")
@@ -31,20 +32,18 @@ function extractJSONFromGemini(response: any) {
     .replace(/\n/g, " ")
     .trim();
 
-  // try standard JSON parsing
+  // Try standard JSON.parse
   try {
     return JSON.parse(possibleJson);
   } catch {
-    // try JSON5 forgiving parser (already imported at top)
+    // If it fails, try JSON5 forgiving parser
     try {
       return JSON5.parse(possibleJson);
-    } catch (e) {
-      throw new Error("Failed to parse or repair JSON: " + (e as Error).message);
+    } catch (e: any) {
+      throw new Error("Failed to repair JSON: " + e.message);
     }
   }
 }
-// -------------------------------------------------------------------------
-
 
 const GEMINI_API_KEY = (import.meta.env.VITE_GEMINI_API_KEY || "").trim();
 
