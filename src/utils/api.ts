@@ -1,53 +1,50 @@
 import type { InputData, Stage1Output, ISQ, ExcelData } from "../types";
+import JSON5 from "json5";
 
 // ---------------- GEMINI JSON EXTRACTOR (NEW) -----------------
+f// ---------------- GEMINI JSON EXTRACTOR (FIXED & CLEAN) -----------------
 function extractJSONFromGemini(response: any) {
   if (!response?.candidates?.length) {
     throw new Error("No candidates found in Gemini response");
   }
 
- // --- REPLACE OLD LOGIC WITH THIS ---
-const raw = response;
+  // Gemini sometimes returns objects → convert safely to string
+  const raw = typeof response === "string" ? response : JSON.stringify(response);
 
-// 1. find the first and last curly bracket
-const start = raw.indexOf("{");
-const end = raw.lastIndexOf("}");
+  // find first and last curly bracket
+  const start = raw.indexOf("{");
+  const end = raw.lastIndexOf("}");
 
-if (start === -1 || end === -1 || end <= start) {
-  throw new Error("No JSON-like structure detected");
-}
+  if (start === -1 || end === -1 || end <= start) {
+    throw new Error("No JSON-like structure detected");
+  }
 
-let possibleJson = raw.slice(start, end + 1);
+  // extract possible JSON segment
+  let possibleJson = raw.slice(start, end + 1);
 
-// 2. strip common Gemini noise
-possibleJson = possibleJson
-  .replace(/```json/gi, "")
-  .replace(/```/g, "")
-  .replace(/^\s*Here is.*?{/i, "{")
-  .replace(/^\s*JSON output.*?{/i, "{")
-  .replace(/\n/g, " ");
+  // clean Gemini formatting noise
+  possibleJson = possibleJson
+    .replace(/```json/gi, "")
+    .replace(/```/g, "")
+    .replace(/^\s*Here is.*?{/i, "{")
+    .replace(/^\s*JSON output.*?{/i, "{")
+    .replace(/\n/g, " ")
+    .trim();
 
-// 3. try normal JSON.parse
-try {
-  return JSON.parse(possibleJson);
-} catch (e1) {
-  // 4. try JSON5 as fallback (forgiving parser)
+  // try standard JSON parsing
   try {
-    import JSON5 from "json5";
-    return JSON5.parse(possibleJson);
-  } catch (e2) {
-    throw new Error("Failed to repair JSON: " + e2.message);
+    return JSON.parse(possibleJson);
+  } catch {
+    // try JSON5 forgiving parser (already imported at top)
+    try {
+      return JSON5.parse(possibleJson);
+    } catch (e) {
+      throw new Error("Failed to parse or repair JSON: " + (e as Error).message);
+    }
   }
 }
+// -------------------------------------------------------------------------
 
-
-  // Fallback: extract JSON from text response
-  const match = raw.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error("No valid JSON found in Gemini response");
-
-  return JSON.parse(match[0]);
-}
-// ---------------------------------------------------------------
 
 const GEMINI_API_KEY = (import.meta.env.VITE_GEMINI_API_KEY || "").trim();
 
