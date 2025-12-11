@@ -1,5 +1,37 @@
 import type { InputData, Stage1Output, ISQ, ExcelData } from "../types";
 
+// ---------------- GEMINI JSON EXTRACTOR (NEW) -----------------
+function extractJSONFromGemini(response: any) {
+  if (!response?.candidates?.length) {
+    throw new Error("No candidates found in Gemini response");
+  }
+
+  const content = response.candidates[0].content;
+  if (!content) throw new Error("No content in Gemini response");
+
+  let raw = "";
+
+  const parts = content.parts || content || [];
+
+  for (const part of parts) {
+    if (typeof part.text === "string") {
+      raw += part.text + "\n";
+    }
+
+    // If Gemini returns a direct json object
+    if (part.json) {
+      return part.json;
+    }
+  }
+
+  // Fallback: extract JSON from text response
+  const match = raw.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error("No valid JSON found in Gemini response");
+
+  return JSON.parse(match[0]);
+}
+// ---------------------------------------------------------------
+
 const GEMINI_API_KEY = (import.meta.env.VITE_GEMINI_API_KEY || "").trim();
 
 export async function generateStage1WithGemini(
