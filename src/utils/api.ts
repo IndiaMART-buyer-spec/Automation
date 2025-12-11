@@ -131,16 +131,42 @@ export async function extractISQWithGemini(
 }
 
 function extractJSON(text: string): string | null {
-  const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-  if (jsonMatch) {
+  // First, try the whole text as-is (might be raw JSON)
+  text = text.trim();
+  if (text.startsWith('{')) {
     try {
-      JSON.parse(jsonMatch[1]);
-      return jsonMatch[1];
+      JSON.parse(text);
+      return text;
     } catch {
-      // Continue to next extraction method
+      // Continue to other methods
     }
   }
 
+  // Try markdown code block with json label
+  let codeBlockMatch = text.match(/```json\s*\n?([\s\S]*?)\n?```/);
+  if (codeBlockMatch) {
+    const extracted = codeBlockMatch[1].trim();
+    try {
+      JSON.parse(extracted);
+      return extracted;
+    } catch (e) {
+      console.error("Failed to parse JSON from json code block:", e);
+    }
+  }
+
+  // Try markdown code block without language
+  codeBlockMatch = text.match(/```\s*\n?([\s\S]*?)\n?```/);
+  if (codeBlockMatch) {
+    const extracted = codeBlockMatch[1].trim();
+    try {
+      JSON.parse(extracted);
+      return extracted;
+    } catch (e) {
+      console.error("Failed to parse JSON from code block:", e);
+    }
+  }
+
+  // Try to find JSON by looking for { and }
   let braceCount = 0;
   let inString = false;
   let escapeNext = false;
@@ -171,19 +197,21 @@ function extractJSON(text: string): string | null {
       } else if (char === '}') {
         braceCount--;
         if (braceCount === 0 && startIdx !== -1) {
-          const jsonStr = text.substring(startIdx, i + 1);
+          const jsonStr = text.substring(startIdx, i + 1).trim();
           try {
             JSON.parse(jsonStr);
             return jsonStr;
-          } catch {
-            // Continue searching
+          } catch (e) {
+            console.error("Failed to parse extracted JSON:", e);
+            startIdx = -1;
           }
-          startIdx = -1;
         }
       }
     }
   }
 
+  // If nothing found, log the response for debugging
+  console.error("No JSON found in response. Raw response:", text.substring(0, 1000));
   return null;
 }
 
@@ -301,9 +329,11 @@ Match on meaning, not exact words. Consider units, example values, and buyer int
 
 Generate the finalized specs for EVERY child MCAT from the MCAT LIST provided above.
 
-OUTPUT RULES (NON-NEGOTIABLE)
-- Return ONE single JSON object only.
-- No markdown, no fences, no extra text.
+OUTPUT RULES (NON-NEGOTIABLE - CRITICAL)
+- RESPOND WITH PURE JSON ONLY. Nothing else. No text before or after.
+- ABSOLUTELY NO markdown code blocks, NO triple backticks, NO fenced code blocks, just raw JSON.
+- ABSOLUTELY NO explanations, NO reasoning, NO preamble, NO conclusion text.
+- Return ONE single JSON object that looks EXACTLY like the schema below.
 - The output MUST include EVERY MCAT exactly once (no missing, no extras).
 - DO NOT invent / renumber IDs. Each mcat_id MUST be copied exactly from the MCAT LIST above.
 - category_name MUST match the MCAT LIST name exactly.
@@ -380,7 +410,7 @@ Extract:
 
 EXCLUSION: If spec is in MCAT Name (e.g., "Material"), exclude it.
 
-Return JSON:
+RESPOND WITH PURE JSON ONLY - Nothing else. No markdown, no explanation, just raw JSON that looks exactly like this:
 {
   "config": {"name": "...", "options": [...]},
   "keys": [{"name": "...", "options": [...]}, ...],
