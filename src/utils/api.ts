@@ -1,49 +1,4 @@
 import type { InputData, Stage1Output, ISQ, ExcelData } from "../types";
-import JSON5 from "json5";
-
-
-// ---------------- GEMINI JSON EXTRACTOR (NEW) -----------------
-
-function extractJSONFromGemini(response: any) {
-  if (!response?.candidates?.length) {
-    throw new Error("No candidates found in Gemini response");
-  }
-
-  // Convert response safely to string (Gemini sometimes sends objects)
-  const raw = typeof response === "string" ? response : JSON.stringify(response);
-
-  // Find first and last curly bracket
-  const start = raw.indexOf("{");
-  const end = raw.lastIndexOf("}");
-
-  if (start === -1 || end === -1 || end <= start) {
-    throw new Error("No JSON-like structure detected");
-  }
-
-  // Extract possible JSON part
-  let possibleJson = raw.slice(start, end + 1);
-
-  // Remove Gemini formatting noise
-  possibleJson = possibleJson
-    .replace(/```json/gi, "")
-    .replace(/```/g, "")
-    .replace(/^\s*Here is.*?{/i, "{")
-    .replace(/^\s*JSON output.*?{/i, "{")
-    .replace(/\n/g, " ")
-    .trim();
-
-  // Try standard JSON.parse
-  try {
-    return JSON.parse(possibleJson);
-  } catch {
-    // If it fails, try JSON5 forgiving parser
-    try {
-      return JSON5.parse(possibleJson);
-    } catch (e: any) {
-      throw new Error("Failed to repair JSON: " + e.message);
-    }
-  }
-}
 
 const GEMINI_API_KEY = (import.meta.env.VITE_GEMINI_API_KEY || "").trim();
 
@@ -94,9 +49,12 @@ export async function generateStage1WithGemini(
       throw new Error("No response from Gemini API");
     }
 
-  const result = extractJSONFromGemini(data);
-  return result;
+    const content = data.candidates[0].content.parts[0].text;
 
+    const jsonStr = extractJSON(content);
+    if (!jsonStr) {
+      throw new Error("No valid JSON found in Gemini response");
+    }
 
     return JSON.parse(jsonStr);
   } catch (error) {
@@ -156,9 +114,7 @@ export async function extractISQWithGemini(
       throw new Error("No response from Gemini API");
     }
 
-    const result = extractJSONFromGemini(data);
-    return result;
-
+    const content = data.candidates[0].content.parts[0].text;
 
     const jsonStr = extractJSON(content);
     if (!jsonStr) {
@@ -440,12 +396,10 @@ function buildISQExtractionPrompt(
   contents: string[]
 ): string {
   const urlsText = urls
-    .map((url, i) => `URL ${i + 1}: ${url}\nContent: ${contents[i]}...`)
+    .map((url, i) => `URL ${i + 1}: ${url}\nContent: ${contents[i].substring(0, 500)}...`)
     .join("\n\n");
 
-  return ` YOU MUST FORGET ALL PREVIOUS RULES AND SCHEMAS.  
-ONLY FOLLOW THE INSTRUCTIONS BELOW FOR ISQ EXTRACTION.
-Extract ISQs from these URLs for: ${input.mcats.map((m) => m.mcat_name).join(", ")}
+  return `Extract ISQs from these URLs for: ${input.mcats.map((m) => m.mcat_name).join(", ")}
 
 ${urlsText}
 
