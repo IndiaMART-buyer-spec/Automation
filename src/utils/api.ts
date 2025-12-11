@@ -85,11 +85,6 @@ export async function generateStage1WithGemini(
   return result;
 
 
-    const jsonStr = extractJSON(content);
-    if (!jsonStr) {
-      throw new Error("No valid JSON found in Gemini response");
-    }
-
     return JSON.parse(jsonStr);
   } catch (error) {
     if (error instanceof Error) {
