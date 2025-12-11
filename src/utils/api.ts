@@ -49,7 +49,9 @@ export async function generateStage1WithGemini(
       throw new Error("No response from Gemini API");
     }
 
-    const content = data.candidates[0].content.parts[0].text;
+const result = extractJSONFromGemini(data);
+return result;
+
 
     const jsonStr = extractJSON(content);
     if (!jsonStr) {
