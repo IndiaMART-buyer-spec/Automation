@@ -461,7 +461,8 @@ RESPOND WITH PURE JSON ONLY - Nothing else. No markdown, no explanation, just ra
   "config": {"name": "...", "options": [...]},
   "keys": [{"name": "...", "options": [...]}, ...],
   "buyers": [{"name": "...", "options": [...]}, ...]
-}`
+}`;
+}
 
 export async function generateExcel(
   stage1: Stage1Output,
