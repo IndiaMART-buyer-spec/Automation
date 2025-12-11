@@ -427,10 +427,12 @@ function buildISQExtractionPrompt(
   contents: string[]
 ): string {
   const urlsText = urls
-    .map((url, i) => `URL ${i + 1}: ${url}\nContent: ${contents[i].substring(0, 500)}...`)
+    .map((url, i) => `URL ${i + 1}: ${url}\nContent: ${contents[i]}...`)
     .join("\n\n");
 
-  return `Extract ISQs from these URLs for: ${input.mcats.map((m) => m.mcat_name).join(", ")}
+  return ` YOU MUST FORGET ALL PREVIOUS RULES AND SCHEMAS.  
+ONLY FOLLOW THE INSTRUCTIONS BELOW FOR ISQ EXTRACTION.
+Extract ISQs from these URLs for: ${input.mcats.map((m) => m.mcat_name).join(", ")}
 
 ${urlsText}
 
