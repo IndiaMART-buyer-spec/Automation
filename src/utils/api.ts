@@ -440,8 +440,8 @@ REQUIRED JSON SCHEMA (match keys + nesting exactly)
     }
   ]
 }
-}
 }`;
+}
 
 function buildISQExtractionPrompt(
   input: InputData,
