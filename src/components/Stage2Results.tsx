@@ -9,21 +9,20 @@ interface Stage2ResultsProps {
     buyers: ISQ[];
   };
   onDownloadExcel: () => void;
-  onComparison: () => void;
   loading?: boolean;
 }
 
 export default function Stage2Results({
   isqs,
   onDownloadExcel,
-  onComparison,
   loading = false,
 }: Stage2ResultsProps) {
   return (
-    <div className="w-full max-w-6xl mx-auto p-6">
-      <div className="bg-white rounded-lg shadow-lg p-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Stage 2: ISQ Extraction Complete</h1>
-        <p className="text-gray-600 mb-8">Review the extracted ISQs and download the Excel file</p>
+    <div>
+      <h2 className="text-2xl font-bold text-gray-900 mb-2">Stage 2: ISQ Extraction Complete</h2>
+      <p className="text-gray-600 mb-8">Review the extracted ISQs below</p>
+
+      <div className="space-y-8">
 
         {/* Config ISQ */}
         <div className="mb-8">
@@ -90,23 +89,16 @@ export default function Stage2Results({
           </div>
         </div>
 
-        <div className="flex gap-4 mt-8 pt-8 border-t border-gray-200">
-          <button
-            onClick={onDownloadExcel}
-            disabled={loading}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg hover:from-green-700 hover:to-green-800 disabled:opacity-50 transition"
-          >
-            <Download size={20} />
-            Download Excel Report
-          </button>
-          <button
-            onClick={onComparison}
-            disabled={loading}
-            className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-purple-800 disabled:opacity-50 transition"
-          >
-            Compare Two Gemini Runs
-          </button>
-        </div>
+      <div className="mt-8 pt-8 border-t border-gray-200">
+        <button
+          onClick={onDownloadExcel}
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg hover:from-green-700 hover:to-green-800 disabled:opacity-50 transition"
+        >
+          <Download size={20} />
+          Download Excel Report
+        </button>
+      </div>
       </div>
     </div>
   );

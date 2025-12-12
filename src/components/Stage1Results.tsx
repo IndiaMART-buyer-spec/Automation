@@ -9,10 +9,11 @@ interface Stage1ResultsProps {
 
 export default function Stage1Results({ data, onNext, loading = false }: Stage1ResultsProps) {
   return (
-    <div className="w-full max-w-6xl mx-auto p-6">
-      <div className="bg-white rounded-lg shadow-lg p-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Stage 1: Specifications Generated</h1>
-        <p className="text-gray-600 mb-8">Review the generated product specifications below</p>
+    <div>
+      <h2 className="text-2xl font-bold text-gray-900 mb-2">Stage 1: Specifications Generated</h2>
+      <p className="text-gray-600 mb-8">Review the generated product specifications below</p>
+
+      <div className="space-y-8">
 
         {data.seller_specs.map((spec, specsIdx) => (
           <div key={specsIdx} className="mb-8">
@@ -100,15 +101,15 @@ export default function Stage1Results({ data, onNext, loading = false }: Stage1R
           </div>
         ))}
 
-        <div className="flex gap-4 mt-8 pt-8 border-t border-gray-200">
-          <button
-            onClick={onNext}
-            disabled={loading}
-            className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 transition"
-          >
-            {loading ? "Processing ISQ Extraction..." : "Next: Extract ISQs"}
-          </button>
-        </div>
+      <div className="mt-8 pt-8 border-t border-gray-200">
+        <button
+          onClick={onNext}
+          disabled={loading}
+          className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 transition"
+        >
+          {loading ? "Processing ISQ Extraction..." : "Extract ISQs from URLs"}
+        </button>
+      </div>
       </div>
     </div>
   );
