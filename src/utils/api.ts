@@ -1,5 +1,52 @@
 import type { InputData, Stage1Output, ISQ, ExcelData } from "../types";
 
+function extractJSONFromGemini(response) {
+  if (!response?.candidates?.length) {
+    throw new Error("No candidates found in Gemini response");
+  }
+
+  const parts =
+    response.candidates[0]?.content?.parts ||
+    response.candidates[0]?.content ||
+    [];
+
+  let rawText = "";
+
+  for (const part of parts) {
+    if (typeof part.text === "string") {
+      rawText += part.text + "\n";
+    }
+
+    if (part.json) {
+      return part.json; 
+    }
+  }
+
+  // Clean markdown wrappers
+  let cleaned = rawText
+    .replace(/```json/gi, "")
+    .replace(/```/g, "")
+    .trim();
+
+  // Extract JSON block
+  const match = cleaned.match(/\{[\s\S]*\}/);
+  if (match) cleaned = match[0];
+
+  // Fix trailing commas
+  cleaned = cleaned.replace(/,(\s*[\]}])/g, "$1");
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (err) {
+    console.warn("Gemini JSON parse failed: returning safe fallback.");
+
+    return {
+      seller_specs: [],
+    };
+  }
+}
+
+
 const GEMINI_API_KEY = (import.meta.env.VITE_GEMINI_API_KEY || "").trim();
 
 export async function generateStage1WithGemini(
@@ -50,14 +97,8 @@ export async function generateStage1WithGemini(
       throw new Error("No response from Gemini API");
     }
 
-    const content = data.candidates[0].content.parts[0].text;
+return extractJSONFromGemini(data);
 
-    const jsonStr = extractJSON(content);
-    if (!jsonStr) {
-      throw new Error("No valid JSON found in Gemini response");
-    }
-
-    return JSON.parse(jsonStr);
   } catch (error) {
     if (error instanceof Error) {
       throw error;
