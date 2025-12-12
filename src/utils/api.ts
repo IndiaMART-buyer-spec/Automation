@@ -277,6 +277,10 @@ PMCAT Name: ${input.pmcat_name || "(blank)"}
 PMCAT ID: ${input.pmcat_id || "(blank)"}
 MCATs: ${mcatNames}
 
+Return ONLY valid JSON.
+Do NOT add explanation, notes, or text before or after JSON.
+Output must start with { and end with }.
+
 C**Your entire analysis must follow these critical rules:**
 
 * **Common Spec Name:** For each specification, use only the most common name used by sellers and buyers in the **Indian B2B market**.
@@ -381,6 +385,12 @@ OUTPUT RULES (NON-NEGOTIABLE - CRITICAL)
 - DO NOT invent / renumber IDs. Each mcat_id MUST be copied exactly from the MCAT LIST above.
 - category_name MUST match the MCAT LIST name exactly.
 
+STRICT FORMAT RULES:
+- Output must be a single JSON object only.
+- Do not include markdown.
+- Do not include text outside JSON.
+- Do not wrap JSON in quotes.
+
 REQUIRED JSON SCHEMA (match keys + nesting exactly)
 
 {
@@ -430,8 +440,8 @@ REQUIRED JSON SCHEMA (match keys + nesting exactly)
     }
   ]
 }
-}`;
 }
+}`;
 
 function buildISQExtractionPrompt(
   input: InputData,
