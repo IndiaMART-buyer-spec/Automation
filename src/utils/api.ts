@@ -281,7 +281,7 @@ Return ONLY valid JSON.
 Do NOT add explanation, notes, or text before or after JSON.
 Output must start with { and end with }.
 
-C**Your entire analysis must follow these critical rules:**
+**Your entire analysis must follow these critical rules:**
 
 * **Common Spec Name:** For each specification, use only the most common name used by sellers and buyers in the **Indian B2B market**.
 * **Option Coverage:** Aim to cover the most common listings options that collectively cover at least 95% of the products and buyer inquiries for this category.
