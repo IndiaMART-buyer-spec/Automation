@@ -196,6 +196,10 @@ export async function extractISQWithGemini(
 }
 
 function extractJSON(text: string): string | null {
+
+  // Start of function
+text = text.replace(/```json|```/gi, "").trim();
+
   // First, try the whole text as-is (might be raw JSON)
   text = text.trim();
   if (text.startsWith('{')) {
