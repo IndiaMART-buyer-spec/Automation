@@ -506,7 +506,7 @@ Format requirements:
 - Include only **popular options** (those that appear frequently in multiple URLs), sorted by frequency/popularity.
 - Option values must be < 25 characters.
 - Always maintain consistent units and formats for a spec.
-`;
+`};
 
 export async function generateExcel(
   stage1: Stage1Output,
