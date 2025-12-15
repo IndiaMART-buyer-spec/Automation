@@ -1,5 +1,36 @@
 import type { InputData, Stage1Output, ISQ, ExcelData } from "../types";
 
+const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
+
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  retries = 3,
+  baseDelay = 3000
+): Promise<Response> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const response = await fetch(url, options);
+
+    if (response.ok) return response;
+
+    if (response.status === 429 || response.status === 503 || response.status === 502) {
+      if (attempt === retries) {
+        throw new Error(`Gemini overloaded after ${retries + 1} attempts`);
+      }
+      const waitTime = baseDelay * Math.pow(2, attempt);
+      console.warn(`Gemini overloaded (${response.status}). Retrying in ${waitTime}ms`);
+      await sleep(waitTime);
+      continue;
+    }
+
+    const err = await response.text();
+    throw new Error(`Gemini API error ${response.status}: ${err}`);
+  }
+
+  throw new Error("Unreachable");
+}
+
+
 function extractJSONFromGemini(response) {
   if (!response?.candidates?.length) {
     throw new Error("No candidates found in Gemini response");
