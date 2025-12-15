@@ -11,7 +11,6 @@ function normalizeSpecName(name: string): string {
     .trim();
 }
 
-
 const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 async function fetchWithRetry(
@@ -538,7 +537,31 @@ export function compareResults(
   const chatgptNames = extractAllSpecNames(chatgptSpecs);
   const geminiNames = extractAllSpecNames(geminiSpecs);
 
-  const common = chatgptNames.filter((name) => geminiNames.includes(name));
+  export function compareResults(
+  chatgptSpecs: Stage1Output,
+  geminiSpecs: Stage1Output
+) {
+  const chatgptNames = extractAllSpecNames(chatgptSpecs);
+  const geminiNames = extractAllSpecNames(geminiSpecs);
+
+  const common = chatgptNames.filter(c =>
+    geminiNames.some(g => normalizeSpecName(g) === normalizeSpecName(c))
+  );
+
+  const chatgptUnique = chatgptNames.filter(
+    c => !geminiNames.some(g => normalizeSpecName(g) === normalizeSpecName(c))
+  );
+
+  const geminiUnique = geminiNames.filter(
+    g => !chatgptNames.some(c => normalizeSpecName(g) === normalizeSpecName(c))
+  );
+
+  return {
+    common_specs: [...new Set(common)],
+    chatgpt_unique_specs: [...new Set(chatgptUnique)],
+    gemini_unique_specs: [...new Set(geminiUnique)],
+  };
+}
   const chatgptUnique = chatgptNames.filter((name) => !geminiNames.includes(name));
   const geminiUnique = geminiNames.filter((name) => !chatgptNames.includes(name));
 
