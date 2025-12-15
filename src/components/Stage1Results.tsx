@@ -8,6 +8,9 @@ interface Stage1ResultsProps {
 }
 
 export default function Stage1Results({ data, onNext, loading = false }: Stage1ResultsProps) {
+if (!data?.seller_specs?.length) 
+    return <div className="text-center py-8 text-gray-600">No data found</div>;
+  
   return (
     <div>
       <h2 className="text-2xl font-bold text-gray-900 mb-2">Stage 1: Specifications Generated</h2>
