@@ -482,31 +482,31 @@ function buildISQExtractionPrompt(
 
 ${urlsText}
 
-Extract:
-1. CONFIG ISQ (exactly 1): Must influence price, options must match URLs exactly
-2. KEY ISQs (exactly 3): Most repeated + category defining
+EInstructions:
+1. CONFIG ISQ (exactly 1): Must influence price; options must match URLs exactly.
+2. KEY ISQs (exactly 3): Must be most repeated, category-defining, and appear in at least 2 URLs.
+3. Only include spec options that are **popular** across multiple URLs. Ignore rare or single-URL options.
+4. Ignore any options not present in at least 2 URLs.
+5. Do NOT invent new specs or options.
+6. If a spec appears only once across all URLs → skip it.
+7. Exclude any spec that is identical to the MCAT Name (e.g., "Material").
+8. Output **pure JSON only**, no extra text, no markdown, no explanations.
 
-STRICT RULES:
-- DO NOT invent specs
-- Extract ONLY specs that appear in AT LEAST 2 URLs
-- If a spec appears in only 1 URL → IGNORE it
-- If options differ, keep ONLY options that appear in AT LEAST 2 URLs
-- Do NOT guess missing options
-EXCLUSION: If spec is in MCAT Name (e.g., "Material"), exclude it.
-
-REQUIREMENTS:
-- Return ONLY valid JSON.
-- Absolutely no text, notes, or markdown outside JSON.
-- If you include examples, they must be inside JSON only.
+Format requirements:
 - Output MUST start with { and end with }.
-- If the JSON is split across lines or contains markdown, still return valid JSON object
-
-RESPOND WITH PURE JSON ONLY - Nothing else. No markdown, no explanation, just raw JSON that looks exactly like this:
+- Use exactly this JSON structure:
 {
-  "config": {"name": "...", "options": [...]},
-  "keys": [{"name": "...", "options": [...]}, ...]
-}`;
+  "config": {"name": "<spec_name>", "options": ["<option1>", "<option2>", ...]},
+  "keys": [
+    {"name": "<spec_name>", "options": ["<option1>", "<option2>", ...]},
+    ...
+  ]
 }
+
+- Include only **popular options** (those that appear frequently in multiple URLs), sorted by frequency/popularity.
+- Option values must be < 25 characters.
+- Always maintain consistent units and formats for a spec.
+`;
 
 export async function generateExcel(
   stage1: Stage1Output,
