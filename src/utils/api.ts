@@ -537,13 +537,6 @@ export function compareResults(
   const chatgptNames = extractAllSpecNames(chatgptSpecs);
   const geminiNames = extractAllSpecNames(geminiSpecs);
 
-  export function compareResults(
-  chatgptSpecs: Stage1Output,
-  geminiSpecs: Stage1Output
-) {
-  const chatgptNames = extractAllSpecNames(chatgptSpecs);
-  const geminiNames = extractAllSpecNames(geminiSpecs);
-
   const common = chatgptNames.filter(c =>
     geminiNames.some(g => normalizeSpecName(g) === normalizeSpecName(c))
   );
@@ -562,15 +555,7 @@ export function compareResults(
     gemini_unique_specs: [...new Set(geminiUnique)],
   };
 }
-  const chatgptUnique = chatgptNames.filter((name) => !geminiNames.includes(name));
-  const geminiUnique = geminiNames.filter((name) => !chatgptNames.includes(name));
 
-  return {
-    common_specs: [...new Set(common)],
-    chatgpt_unique_specs: [...new Set(chatgptUnique)],
-    gemini_unique_specs: [...new Set(geminiUnique)],
-  };
-}
 
 function extractAllSpecNames(specs: Stage1Output): string[] {
   const names: string[] = [];
