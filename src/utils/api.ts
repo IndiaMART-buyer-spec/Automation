@@ -290,7 +290,7 @@ async function fetchURL(url: string): Promise<string> {
     const html = await response.text();
     // Extract visible text from HTML
     const doc = new DOMParser().parseFromString(html, "text/html");
-    return doc.body.textContent || "";
+    return doc.body.textContent || "").slice(0, 4000);;
   } catch {
     return "";
   }
