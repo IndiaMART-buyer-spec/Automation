@@ -90,45 +90,25 @@ export async function generateStage1WithGemini(
   const prompt = buildStage1Prompt(input);
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt,
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 4096,
-            responseMimeType: "application/json"
-          },
-        }),
+   const response = await fetchWithRetry(
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.4,
+        maxOutputTokens: 4096,
+        responseMimeType: "application/json"
       }
-    );
+    })
+  }
+);
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const errorMsg = errorData.error?.message || response.statusText;
-      throw new Error(`Gemini API error: ${response.status} - ${errorMsg}`);
-    }
-
-    const data = await response.json();
-
-    if (!data.candidates || !data.candidates[0]) {
-      throw new Error("No response from Gemini API");
-    }
-
+const data = await response.json();
 return extractJSONFromGemini(data);
+
 
   } catch (error) {
     if (error instanceof Error) {
