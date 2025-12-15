@@ -482,7 +482,7 @@ function buildISQExtractionPrompt(
 
 ${urlsText}
 
-EInstructions:
+Instructions:
 1. CONFIG ISQ (exactly 1): Must influence price; options must match URLs exactly.
 2. KEY ISQs (exactly 3): Must be most repeated, category-defining, and appear in at least 2 URLs.
 3. Only include spec options that are **popular** across multiple URLs. Ignore rare or single-URL options.
