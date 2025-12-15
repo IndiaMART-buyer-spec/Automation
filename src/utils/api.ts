@@ -489,9 +489,14 @@ STRICT RULES:
 - If a spec appears in only 1 URL → IGNORE it
 - If options differ, keep ONLY options that appear in AT LEAST 2 URLs
 - Do NOT guess missing options
-
-
 EXCLUSION: If spec is in MCAT Name (e.g., "Material"), exclude it.
+
+REQUIREMENTS:
+- Return ONLY valid JSON.
+- Absolutely no text, notes, or markdown outside JSON.
+- If you include examples, they must be inside JSON only.
+- Output MUST start with { and end with }.
+- If the JSON is split across lines or contains markdown, still return valid JSON object
 
 RESPOND WITH PURE JSON ONLY - Nothing else. No markdown, no explanation, just raw JSON that looks exactly like this:
 {
