@@ -461,6 +461,14 @@ Extract:
 2. KEY ISQs (exactly 3): Most repeated + category defining
 3. BUYER ISQs (exactly 2): One must match Config ISQ name, no multi-select
 
+STRICT RULES:
+- DO NOT invent specs
+- Extract ONLY specs that appear in AT LEAST 2 URLs
+- If a spec appears in only 1 URL → IGNORE it
+- If options differ, keep ONLY options that appear in AT LEAST 2 URLs
+- Do NOT guess missing options
+
+
 EXCLUSION: If spec is in MCAT Name (e.g., "Material"), exclude it.
 
 RESPOND WITH PURE JSON ONLY - Nothing else. No markdown, no explanation, just raw JSON that looks exactly like this:
