@@ -8,8 +8,6 @@ interface Stage1ResultsProps {
 }
 
 export default function Stage1Results({ data, onNext, loading = false }: Stage1ResultsProps) {
-if (!data?.seller_specs?.length) 
-    return <div className="text-center py-8 text-gray-600">No data found</div>;
   
   return (
     <div>
