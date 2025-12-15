@@ -504,8 +504,7 @@ REQUIREMENTS:
 RESPOND WITH PURE JSON ONLY - Nothing else. No markdown, no explanation, just raw JSON that looks exactly like this:
 {
   "config": {"name": "...", "options": [...]},
-  "keys": [{"name": "...", "options": [...]}, ...],
-  "buyers": [{"name": "...", "options": [...]}, ...]
+  "keys": [{"name": "...", "options": [...]}, ...]
 }`;
 }
 
