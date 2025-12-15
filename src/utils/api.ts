@@ -1,5 +1,17 @@
 import type { InputData, Stage1Output, ISQ, ExcelData } from "../types";
 
+function normalizeSpecName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/sheet|plate|material/g, "")
+    .replace(/perforation/g, "hole")
+    .replace(/thk/g, "thickness")
+    .replace(/type/g, "shape")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+
 const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 async function fetchWithRetry(
