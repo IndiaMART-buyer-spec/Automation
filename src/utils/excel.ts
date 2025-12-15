@@ -68,12 +68,6 @@ export function generateExcelFile(
       "Options Found": k.options.join(", "),
       "Popularity Rank": i + 1,
     })),
-    ...isqs.buyers.map((b, i) => ({
-      "ISQ Type": "Buyer",
-      "ISQ Name": b.name,
-      "Options Found": b.options.join(", "),
-      "Frequency Rank": i + 1,
-    })),
   ];
 
   const sheet2 = XLSX.utils.json_to_sheet(websiteEvidence);
@@ -106,18 +100,7 @@ export function generateExcelFile(
     });
   });
 
-  isqs.buyers.forEach((b) => {
-    finalISQs.push({
-      Type: "Buyer ISQ",
-      Name: b.name,
-      "Option 1": b.options[0] || "",
-      "Option 2": b.options[1] || "",
-      "Option 3": b.options[2] || "",
-      "Option 4": b.options[3] || "",
-      "Option 5": b.options[4] || "",
-      "Total Options": b.options.length,
-    });
-  });
+  
 
   const sheet3 = XLSX.utils.json_to_sheet(finalISQs);
   XLSX.utils.book_append_sheet(workbook, sheet3, "Final ISQs");
